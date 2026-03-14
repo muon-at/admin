@@ -7,16 +7,26 @@ export default function MemoryPage() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [formData, setFormData] = useState({ title: '', content: '', category: 'learning' })
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => { loadMemories() }, [])
 
   async function loadMemories() {
     try {
       setLoading(true)
-      const { data } = await supabase.from('sebastian_memory').select('*').order('created_at', { ascending: false })
-      setMemories(data || [])
-    } catch (error) {
+      setError(null)
+      const { data, error: err } = await supabase.from('sebastian_memory').select('*').order('created_at', { ascending: false })
+      if (err) {
+        console.error('Supabase error:', err)
+        setError(err.message)
+        setMemories([])
+      } else {
+        setMemories(data || [])
+      }
+    } catch (error: any) {
       console.error('Error:', error)
+      setError(error?.message || 'Failed to load memories')
+      setMemories([])
     } finally {
       setLoading(false)
     }
@@ -25,8 +35,10 @@ export default function MemoryPage() {
   async function deleteMemory(id: string) {
     if (!confirm('Delete this memory?')) return
     try {
-      await supabase.from('sebastian_memory').delete().eq('id', id)
-      setMemories(memories.filter((m) => m.id !== id))
+      const { error: err } = await supabase.from('sebastian_memory').delete().eq('id', id)
+      if (!err) {
+        setMemories(memories.filter((m) => m.id !== id))
+      }
     } catch (error) {
       console.error('Error:', error)
     }
@@ -36,14 +48,19 @@ export default function MemoryPage() {
     e.preventDefault()
     if (!formData.title.trim()) return
     try {
-      const { data } = await supabase.from('sebastian_memory').insert(formData).select()
-      if (data) {
+      const { data, error: err } = await supabase.from('sebastian_memory').insert(formData).select()
+      if (err) {
+        console.error('Supabase error:', err)
+        setError(err.message)
+      } else if (data) {
         setMemories([data[0], ...memories])
         setFormData({ title: '', content: '', category: 'learning' })
         setShowForm(false)
+        setError(null)
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error:', error)
+      setError(error?.message || 'Failed to save memory')
     }
   }
 
@@ -66,6 +83,12 @@ export default function MemoryPage() {
         </button>
       </div>
 
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
+          {error}
+        </div>
+      )}
+
       {showForm && (
         <form onSubmit={addMemory} className="bg-white rounded-lg shadow p-6 mb-8">
           <input
@@ -74,6 +97,7 @@ export default function MemoryPage() {
             value={formData.title}
             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
           />
           <textarea
             placeholder="Details..."
@@ -130,7 +154,7 @@ export default function MemoryPage() {
             </div>
           ))
         ) : (
-          <div className="text-center text-gray-600 p-8">No memories found.</div>
+          <div className="text-center text-gray-600 p-8">No memories found. {memories.length === 0 && 'Start by adding one!'}</div>
         )}
       </div>
     </div>

@@ -5,6 +5,7 @@ export default function LearningPage() {
   const [learnings, setLearnings] = useState<any[]>([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [formData, setFormData] = useState({ title: '', summary: '', details: '' })
 
@@ -13,8 +14,14 @@ export default function LearningPage() {
   async function loadLearnings() {
     try {
       setLoading(true)
-      const { data } = await supabase.from('marketing_learnings').select('*').order('created_at', { ascending: false })
-      setLearnings(data || [])
+      const { data, error: err } = await supabase.from('marketing_learnings').select('*').order('created_at', { ascending: false })
+      if (err) {
+        console.error('Error:', err)
+        setError(err.message)
+        setLearnings([])
+      } else {
+        setLearnings(data || [])
+      }
     } catch (error) {
       console.error('Error:', error)
     } finally {

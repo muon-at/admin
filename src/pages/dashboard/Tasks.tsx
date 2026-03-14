@@ -5,6 +5,7 @@ export default function TasksPage() {
   const [tasks, setTasks] = useState<any[]>([])
   const [filter, setFilter] = useState('all')
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [formData, setFormData] = useState({ title: '', description: '', category: 'daily', priority: 5 })
 

@@ -1,0 +1,21 @@
+{
+  "name": "sebastian-second-brain",
+  "version": "1.0.0",
+  "description": "Second brain system powered by Supabase + AI",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "query": "tsx src/queries/index.ts",
+    "search": "tsx src/lib/search.ts",
+    "sync": "tsx scripts/sync.ts",
+    "backup": "tsx scripts/backup.ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.38.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.0",
+    "tsx": "^4.7.0",
+    "@types/node": "^20.0.0"
+  }
+}

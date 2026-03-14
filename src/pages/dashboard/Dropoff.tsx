@@ -1,10 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(
-  import.meta.env.REACT_APP_SUPABASE_URL || '',
-  import.meta.env.REACT_APP_SUPABASE_KEY || ''
-)
+import { supabase } from '../../lib/supabase'
 
 export default function DropoffPage() {
   const [digests, setDigests] = useState<any[]>([])

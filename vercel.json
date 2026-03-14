@@ -4,11 +4,6 @@
   "installCommand": "npm ci",
   "framework": "vite",
   "outputDirectory": "dist",
-  "env": [
-    "REACT_APP_SUPABASE_URL",
-    "REACT_APP_SUPABASE_KEY",
-    "REACT_APP_SUPABASE_SECRET_KEY"
-  ],
   "routes": [
     {
       "src": "^/(?!api|_next|_static|favicon.ico).*",

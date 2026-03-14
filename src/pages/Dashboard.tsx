@@ -7,8 +7,9 @@ import FilesPage from './dashboard/Files'
 import MemoryPage from './dashboard/Memory'
 import ToolsPage from './dashboard/Tools'
 import DropoffPage from './dashboard/Dropoff'
+import FacebookCampaignPage from './dashboard/FacebookCampaign'
 
-type PageType = 'home' | 'ads' | 'learning' | 'tasks' | 'files' | 'memory' | 'tools' | 'dropoff'
+type PageType = 'home' | 'ads' | 'learning' | 'tasks' | 'files' | 'memory' | 'tools' | 'dropoff' | 'facebook'
 
 const pages: Array<{ id: PageType; label: string; icon: string }> = [
   { id: 'home', label: 'Home', icon: '🏠' },
@@ -18,6 +19,7 @@ const pages: Array<{ id: PageType; label: string; icon: string }> = [
   { id: 'files', label: 'Files', icon: '📁' },
   { id: 'memory', label: 'Memory', icon: '🧠' },
   { id: 'tools', label: 'Tools', icon: '🔧' },
+  { id: 'facebook', label: 'Campaign 📍', icon: '🔥' },
   { id: 'dropoff', label: 'Dropoff', icon: '📝' },
 ]
 
@@ -33,6 +35,7 @@ export default function Dashboard() {
       case 'files': return <FilesPage />
       case 'memory': return <MemoryPage />
       case 'tools': return <ToolsPage />
+      case 'facebook': return <FacebookCampaignPage />
       case 'dropoff': return <DropoffPage />
       default: return <DashboardHome />
     }

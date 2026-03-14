@@ -6,7 +6,15 @@
   "outputDirectory": "dist",
   "routes": [
     {
-      "src": "^/(?!api|_next|_static|favicon.ico).*",
+      "src": "^/assets/.*",
+      "dest": "/$0"
+    },
+    {
+      "src": "^/(?!api).*\\..*",
+      "dest": "/$0"
+    },
+    {
+      "src": "^(?!/api).*",
       "dest": "/index.html"
     }
   ]

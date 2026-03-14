@@ -5,6 +5,8 @@ export default function TasksPage() {
   const [tasks, setTasks] = useState<any[]>([])
   const [filter, setFilter] = useState('all')
   const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [formData, setFormData] = useState({ title: '', description: '', category: 'daily', priority: 5 })
 
   useEffect(() => { loadTasks() }, [filter])
 
@@ -32,6 +34,21 @@ export default function TasksPage() {
     }
   }
 
+  async function addTask(e: any) {
+    e.preventDefault()
+    if (!formData.title.trim()) return
+    try {
+      const { data } = await supabase.from('tasks').insert({ ...formData, status: 'pending', created_by: 'sebastian' }).select()
+      if (data) {
+        setTasks([data[0], ...tasks])
+        setFormData({ title: '', description: '', category: 'daily', priority: 5 })
+        setShowForm(false)
+      }
+    } catch (error) {
+      console.error('Error:', error)
+    }
+  }
+
   const stats = {
     pending: tasks.filter((t) => t.status === 'pending').length,
     inProgress: tasks.filter((t) => t.status === 'in_progress').length,
@@ -42,7 +59,60 @@ export default function TasksPage() {
 
   return (
     <div className="p-8">
-      <h1 className="text-4xl font-bold text-gray-900 mb-8">✅ Task Manager</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-4xl font-bold text-gray-900">✅ Task Manager</h1>
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          {showForm ? '✕ Close' : '+ Add Task'}
+        </button>
+      </div>
+
+      {showForm && (
+        <form onSubmit={addTask} className="bg-white rounded-lg shadow p-6 mb-8">
+          <input
+            type="text"
+            placeholder="Task title..."
+            value={formData.title}
+            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <textarea
+            placeholder="Description..."
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500 h-16"
+          />
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <select
+              value={formData.category}
+              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="daily">Daily</option>
+              <option value="strategic">Strategic</option>
+              <option value="automation">Automation</option>
+              <option value="monitoring">Monitoring</option>
+            </select>
+            <input
+              type="number"
+              min="1"
+              max="10"
+              value={formData.priority}
+              onChange={(e) => setFormData({ ...formData, priority: parseInt(e.target.value) })}
+              placeholder="Priority (1-10)"
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+          >
+            Save Task
+          </button>
+        </form>
+      )}
 
       <div className="grid grid-cols-3 gap-4 mb-8">
         <StatCard label="Pending" value={stats.pending} color="yellow" />

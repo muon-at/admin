@@ -5,6 +5,8 @@ export default function MemoryPage() {
   const [memories, setMemories] = useState<any[]>([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [formData, setFormData] = useState({ title: '', content: '', category: 'learning' })
 
   useEffect(() => { loadMemories() }, [])
 
@@ -30,6 +32,21 @@ export default function MemoryPage() {
     }
   }
 
+  async function addMemory(e: any) {
+    e.preventDefault()
+    if (!formData.title.trim()) return
+    try {
+      const { data } = await supabase.from('sebastian_memory').insert(formData).select()
+      if (data) {
+        setMemories([data[0], ...memories])
+        setFormData({ title: '', content: '', category: 'learning' })
+        setShowForm(false)
+      }
+    } catch (error) {
+      console.error('Error:', error)
+    }
+  }
+
   const filtered = memories.filter((m) =>
     m.title.toLowerCase().includes(search.toLowerCase()) ||
     (m.content && m.content.toLowerCase().includes(search.toLowerCase()))
@@ -39,7 +56,50 @@ export default function MemoryPage() {
 
   return (
     <div className="p-8">
-      <h1 className="text-4xl font-bold text-gray-900 mb-8">🧠 Memory Bank</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-4xl font-bold text-gray-900">🧠 Memory Bank</h1>
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          {showForm ? '✕ Close' : '+ Add Memory'}
+        </button>
+      </div>
+
+      {showForm && (
+        <form onSubmit={addMemory} className="bg-white rounded-lg shadow p-6 mb-8">
+          <input
+            type="text"
+            placeholder="Memory title..."
+            value={formData.title}
+            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <textarea
+            placeholder="Details..."
+            value={formData.content}
+            onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500 h-24"
+          />
+          <select
+            value={formData.category}
+            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="learning">Learning</option>
+            <option value="decision">Decision</option>
+            <option value="person">Person</option>
+            <option value="project">Project</option>
+            <option value="preferences">Preferences</option>
+          </select>
+          <button
+            type="submit"
+            className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+          >
+            Save Memory
+          </button>
+        </form>
+      )}
 
       <input
         type="text"

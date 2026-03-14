@@ -5,6 +5,8 @@ export default function LearningPage() {
   const [learnings, setLearnings] = useState<any[]>([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [formData, setFormData] = useState({ title: '', summary: '', details: '' })
 
   useEffect(() => { loadLearnings() }, [])
 
@@ -20,6 +22,21 @@ export default function LearningPage() {
     }
   }
 
+  async function addLearning(e: any) {
+    e.preventDefault()
+    if (!formData.title.trim()) return
+    try {
+      const { data } = await supabase.from('marketing_learnings').insert(formData).select()
+      if (data) {
+        setLearnings([data[0], ...learnings])
+        setFormData({ title: '', summary: '', details: '' })
+        setShowForm(false)
+      }
+    } catch (error) {
+      console.error('Error:', error)
+    }
+  }
+
   const filtered = learnings.filter((l) =>
     l.title.toLowerCase().includes(search.toLowerCase()) ||
     (l.summary && l.summary.toLowerCase().includes(search.toLowerCase()))
@@ -29,7 +46,45 @@ export default function LearningPage() {
 
   return (
     <div className="p-8">
-      <h1 className="text-4xl font-bold text-gray-900 mb-8">💡 Learning Center</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-4xl font-bold text-gray-900">💡 Learning Center</h1>
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          {showForm ? '✕ Close' : '+ Add Learning'}
+        </button>
+      </div>
+
+      {showForm && (
+        <form onSubmit={addLearning} className="bg-white rounded-lg shadow p-6 mb-8">
+          <input
+            type="text"
+            placeholder="Learning title..."
+            value={formData.title}
+            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <textarea
+            placeholder="Summary..."
+            value={formData.summary}
+            onChange={(e) => setFormData({ ...formData, summary: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500 h-24"
+          />
+          <textarea
+            placeholder="Details..."
+            value={formData.details}
+            onChange={(e) => setFormData({ ...formData, details: e.target.value })}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500 h-24"
+          />
+          <button
+            type="submit"
+            className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+          >
+            Save Learning
+          </button>
+        </form>
+      )}
 
       <input
         type="text"
